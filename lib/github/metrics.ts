@@ -63,15 +63,29 @@ export class GitHubMetrics {
 
         const languageBytes: Record<string, number> = {};
 
-        for (const repo of repos) {
-            if (!repo.name) continue;
-            const { data: langs } = await octokit.rest.repos.listLanguages({
-                owner: username,
-                repo: repo.name,
-            });
+        // Batch process repos in chunks of 10 to avoid overwhelming the API
+        const CHUNK_SIZE = 10;
+        const validRepos = repos.filter(repo => repo.name);
+        
+        for (let i = 0; i < validRepos.length; i += CHUNK_SIZE) {
+            const chunk = validRepos.slice(i, i + CHUNK_SIZE);
+            
+            const languagePromises = chunk.map(repo =>
+                octokit.rest.repos.listLanguages({
+                    owner: username,
+                    repo: repo.name,
+                }).catch(error => {
+                    console.warn(`Failed to fetch languages for ${repo.name}:`, error);
+                    return { data: {} };
+                })
+            );
 
-            Object.entries(langs).forEach(([lang, bytes]) => {
-                languageBytes[lang] = (languageBytes[lang] || 0) + (bytes as number);
+            const results = await Promise.all(languagePromises);
+            
+            results.forEach(({ data: langs }) => {
+                Object.entries(langs).forEach(([lang, bytes]) => {
+                    languageBytes[lang] = (languageBytes[lang] || 0) + (bytes as number);
+                });
             });
         }
 
