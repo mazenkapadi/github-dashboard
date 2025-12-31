@@ -84,21 +84,29 @@ export function getRecommendedTTL(): number {
  */
 export async function forceFetch(username: string, ttlMs: number): Promise<CachedResponse> {
     const fresh = await githubMetrics.getAggregatedStats(username);
+    const now = new Date().toISOString();
     const expiresAt = new Date(Date.now() + ttlMs).toISOString();
 
-    const upsertRes = await supabase
+    // First, delete the existing cache entry to ensure a fresh insert
+    await supabase
         .from('github_cache')
-        .upsert(
-            {
-                username,
-                data: fresh,
-                expires_at: expiresAt,
-            },
-            {onConflict: 'username'},
-        );
+        .delete()
+        .eq('username', username);
 
-    if (upsertRes.error) {
-        console.error('Cache upsert error', upsertRes.error);
+    // Then insert the new data
+    const insertRes = await supabase
+        .from('github_cache')
+        .insert({
+            username,
+            data: fresh,
+            expires_at: expiresAt,
+            created_at: now,
+            updated_at: now,
+        });
+
+    if (insertRes.error) {
+        console.error('Cache insert error during force refresh:', insertRes.error);
+        // Even if cache update fails, return the fresh data
     }
 
     return {
