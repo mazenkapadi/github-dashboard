@@ -48,9 +48,9 @@ export class GitHubMetrics {
             name: repo.name,
             url: repo.html_url,
             description: repo.description,
-            stars: repo.stargazers_count,
-            forks: repo.forks_count,
-            language: repo.language,
+            stars: repo.stargazers_count ?? 0,
+            forks: repo.forks_count ?? 0,
+            language: repo.language ?? null,
             updatedAt: repo.updated_at!,
         }));
     }

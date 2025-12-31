@@ -1,6 +1,5 @@
 // components/github/UserCard.tsx
 import type { UserStats } from '@/types/github';
-import {Image} from "next/dist/client/image-component";
 
 type Props = {
     user: UserStats;
@@ -9,7 +8,8 @@ type Props = {
 export default function UserCard({ user }: Props) {
     return (
         <div className="flex items-center gap-6 bg-[#08080b] border border-zinc-900 rounded-2xl px-6 py-5">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
                 src={user.avatar}
                 alt={user.name}
                 className="w-20 h-20 rounded-full border border-zinc-800"
