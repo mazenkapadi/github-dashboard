@@ -39,8 +39,8 @@ export default function LanguageBreakdown({languages}: Props) {
                                 borderRadius: '0.5rem',
                                 fontSize: '11px',
                             }}
-                            formatter={(value: number, _name, entry) => {
-                                const l = entry.payload as LanguageStat;
+                            formatter={(_value, _name, entry) => {
+                                const l = entry?.payload as LanguageStat;
                                 return [
                                     `${l.percentage.toFixed(1)}%`,
                                     l.language,
