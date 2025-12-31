@@ -22,6 +22,8 @@ export interface Repo {
 }
 
 export interface LanguageStat {
+    // Index signature to satisfy Recharts' ChartDataInput requirement
+    [key: string]: string | number;
     language: string;
     bytes: number;
     percentage: number;
